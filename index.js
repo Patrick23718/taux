@@ -7,7 +7,7 @@ const fs = require("fs");
 
 const app = express();
 
-const rates_data = [];
+var rates_data = [];
 let route = "";
 
 const url = "https://www.beac.int/";
@@ -18,6 +18,7 @@ let day = "",
 
 async function getvalue() {
   try {
+    rates_data = [];
     const response = await axios.get(url);
 
     const $ = cheerio.load(response.data);
@@ -99,13 +100,22 @@ app.use((req, res, next) => {
 app.use("/uploads", express.static("uploads"));
 
 app.get("/", async function (req, res) {
-  const rate = await getvalue();
+  await getvalue();
+  res.status(200).send("ok");
+});
+app.get("/rates", function (req, res) {
+  res.status(200).json(rates_data);
+});
+
+app.get("/download", async function (req, res) {
   const file = `${__dirname}/uploads/${route}.xlsx`;
   res.download(file);
 });
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, function () {
   console.log("server listening on: 3000");
 });
 
 // getvalue();
+
